@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo
+    network_mode: host
+
+  mongo-express:
+    image: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: localhost
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongodb
+    network_mode: host
