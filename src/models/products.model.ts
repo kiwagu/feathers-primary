@@ -1,5 +1,5 @@
 // products-model.js - A mongoose model
-// 
+//
 // See http://mongoosejs.com/docs/models.html
 // for more of what you can do here.
 import { Application } from '../declarations';
@@ -9,8 +9,11 @@ export default function (app: Application): Model<any> {
   const modelName = 'products';
   const mongooseClient: Mongoose = app.get('mongooseClient');
   const { Schema } = mongooseClient;
+  // TODO: add constraints for the fields
   const schema = new Schema({
-    text: { type: String, required: true }
+    title: { type: String, required: true },
+    description: { type: String },
+    cost: {type: Number}
   }, {
     timestamps: true
   });
