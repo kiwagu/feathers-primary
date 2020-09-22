@@ -1,13 +1,11 @@
 import { Server } from 'http';
-import logger from '../../src/logger';
-import app from '../../src/app';
-import { user1 } from '../consts';
+import logger from '../../../src/logger';
+import app from '../../../src/app';
+import { user1 } from '../../consts';
 
-import io from 'socket.io-client';
 import feathers from '@feathersjs/feathers';
-import socketio from '@feathersjs/socketio-client';
-import auth from '@feathersjs/authentication-client';
 import { AuthenticationResult } from '@feathersjs/authentication/lib';
+import { getServiceOnWebClient } from './helpers';
 
 // TODO: define TS types
 
@@ -46,14 +44,8 @@ describe('\'products\' service', () => {
     let server: Server;
 
     const port = app.get('port');
-    const socket = io(`http://localhost:${port}`, {
-      transports: ['websocket'],
-    });
     const clientOnWeb = feathers();
-    clientOnWeb.configure(socketio(socket, { timeout: 600000 }));
-    clientOnWeb.configure(auth());
-
-    const productsServiceOnWebClient = clientOnWeb.service('products');
+    const productsServiceOnWebClient = getServiceOnWebClient(clientOnWeb);
 
     beforeAll(async () => {
       server = app.listen(port);
@@ -86,6 +78,7 @@ describe('\'products\' service', () => {
         'Not authenticated'
       );
     });
+
     describe('process with authenticated user', () => {
 
       let authenticationResult: AuthenticationResult;
