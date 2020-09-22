@@ -1,10 +1,13 @@
 import { Server } from 'http';
 import logger from '../../src/logger';
 import app from '../../src/app';
+import { user1 } from '../consts';
 
 import io from 'socket.io-client';
 import feathers from '@feathersjs/feathers';
 import socketio from '@feathersjs/socketio-client';
+import auth from '@feathersjs/authentication-client';
+import { AuthenticationResult } from '@feathersjs/authentication/lib';
 
 // TODO: define TS types
 
@@ -40,16 +43,17 @@ describe('\'products\' service', () => {
   });
 
   describe('process \'products\' service from the web-client', () => {
-
     let server: Server;
 
     const port = app.get('port');
-    const socket = io(`http://localhost:${port}`);
-    const client = feathers();
+    const socket = io(`http://localhost:${port}`, {
+      transports: ['websocket'],
+    });
+    const clientOnWeb = feathers();
+    clientOnWeb.configure(socketio(socket, { timeout: 600000 }));
+    clientOnWeb.configure(auth());
 
-    client.configure(socketio(socket));
-
-    const productsServiceOnWebClient = client.service('products');
+    const productsServiceOnWebClient = clientOnWeb.service('products');
 
     beforeAll(async () => {
       server = app.listen(port);
@@ -77,8 +81,40 @@ describe('\'products\' service', () => {
       });
     });
 
-    it('doesn\'t process without user authentitication', async () => {
-      await expect(productsServiceOnWebClient.find()).rejects.toThrow('Not authenticated');
+    it('doesn\'t process without user authentication', async () => {
+      await expect(productsServiceOnWebClient.find()).rejects.toThrow(
+        'Not authenticated'
+      );
+    });
+    describe('process with authenticated user', () => {
+
+      let authenticationResult: AuthenticationResult;
+
+      beforeAll(async () => {
+        try {
+          await app.service('users').create(user1);
+        } catch (error) {
+          // Do nothing, it just means the user already exists and can be tested
+        }
+      });
+
+      beforeEach(async () => {
+        authenticationResult = await clientOnWeb.authenticate({
+          strategy: 'local',
+          email: user1.email,
+          password: user1.password,
+        });
+      });
+
+      afterEach(() => {
+        return clientOnWeb.logout();
+      });
+
+      it('passes user authentication', async () => {
+        expect(authenticationResult).toHaveProperty('accessToken');
+        expect(authenticationResult).toHaveProperty('user');
+        expect(authenticationResult.user.email).toBe(user1.email);
+      });
     });
   });
 });

@@ -305,6 +305,17 @@
     "@feathersjs/errors" "^4.5.2"
     "@feathersjs/feathers" "^4.5.2"
 
+"@feathersjs/authentication-client@^4.5.8":
+  version "4.5.8"
+  resolved "https://registry.yarnpkg.com/@feathersjs/authentication-client/-/authentication-client-4.5.8.tgz#867a177e7403bb59a66686097055924783daefd1"
+  integrity sha512-CSUBI2ZDL2BercS5QCrj0ew6BI1/81inzoY6oUBKUT+Ni2556SdmxjyKVuA5KUJoVtxQzp/naCffSQYm3CafPg==
+  dependencies:
+    "@feathersjs/authentication" "^4.5.8"
+    "@feathersjs/commons" "^4.5.8"
+    "@feathersjs/errors" "^4.5.8"
+    "@feathersjs/feathers" "^4.5.8"
+    debug "^4.1.1"
+
 "@feathersjs/authentication-local@^4.5.4":
   version "4.5.8"
   resolved "https://registry.yarnpkg.com/@feathersjs/authentication-local/-/authentication-local-4.5.8.tgz#2d5714ae2b12cb7ce4cccad25da2c12c9e5a3f2d"
