@@ -1,7 +1,7 @@
 import { Service, MongooseServiceOptions } from 'feathers-mongoose';
 import { Application } from '../../declarations';
 
-interface ProductData {
+export interface ProductData {
   title: string,
   description: string,
   cost: number
