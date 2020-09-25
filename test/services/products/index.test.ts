@@ -87,6 +87,7 @@ describe('\'products\' service', () => {
         cost: 200,
       };
 
+      let product2result: { _id: any };
       let authenticationResult: AuthenticationResult;
 
       beforeAll(async () => {
@@ -94,6 +95,14 @@ describe('\'products\' service', () => {
           await app.service('users').create(user1);
         } catch (error) {
           // Do nothing, it just means the user already exists and can be tested
+        }
+      });
+
+      afterAll(async () => {
+        if (product2result) {
+          await productsServiceOnServer.remove({
+            _id: product2result._id,
+          });
         }
       });
 
@@ -115,21 +124,31 @@ describe('\'products\' service', () => {
         expect(authenticationResult.user.email).toBe(user1.email);
       });
 
-      it('handles `created` events on the web client', async (done) => {
+      it('handles `created` event on the web client', async (done) => {
         // subscribe to the event on the web client side
         productsServiceOnWebClient.on('created', (message) => {
+          done();
           expect(message.title).toBe(product2.title);
           expect(message.description).toBe(product2.description);
           expect(message.cost).toBe(product2.cost);
         });
 
-        // make the `created` event on the server side
-        const createResult = await productsServiceOnServer.create(product2);
-        await productsServiceOnServer.remove({
-          _id: createResult._id,
+        // init the `created` event on the server side
+        product2result = await productsServiceOnServer.create(product2);
+      });
+
+      it('handles `updated` event on the web client', async (done) => {
+        const newCost = 201;
+
+        // subscribe to the event on the web client side
+        productsServiceOnWebClient.on('updated', (message) => {
+          done();
+          expect(message.cost).toBe(newCost);
         });
 
-        done();
+        product2.cost = newCost;
+        // init the `updated` event on the clien side
+        await productsServiceOnWebClient.update(product2result._id, product2);
       });
     });
   });
